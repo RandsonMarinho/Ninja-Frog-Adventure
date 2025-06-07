@@ -1,34 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// Handles trampoline behavior: animates and launches the player upward on contact.
+/// </summary>
 
 public class Trampoline : MonoBehaviour
 {
-/*                 DECLARANDO UMA VARIÁVEL PARA A ANIMAÇÃO DO TRAMPOLIM E OUTRA PARA O ÁUDIO
---------------------------------------------------------------------------------------------------------------*/
+    [Header("References")]
+    [Tooltip("Animator component for the trampoline animation.")]
     public Animator anim;
+
+    [Tooltip("Audio GameObject that plays when the trampoline is activated.")]
     public GameObject trampolineAudio;
 
-
-/*         IMPULSIONANDO O PLAYER QUANDO ENCOSTAR NO TRAMPOLIN, E ATIVANDO A ANIMAÇÃO DO TRAMPOLIM
---------------------------------------------------------------------------------------------------------------*/
+    /// <summary>
+    /// Activates the trampoline animation, plays audio, and launches the player upwards.
+    /// </summary>
+    /// <param name="collision">Collision data from the 2D physics system.</param>
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
             anim.SetBool("trampolin", true);
-            collision.rigidbody.AddForce(new Vector2(0, 20), ForceMode2D.Impulse);
-            GameObject obj = Instantiate(trampolineAudio, new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y, this.gameObject.transform.position.z), Quaternion.identity);
-            Destroy(obj.gameObject, 1);
+            collision.rigidbody.AddForce(Vector2.up * 20, ForceMode2D.Impulse);
+
+            GameObject obj = Instantiate(trampolineAudio, transform.position, Quaternion.identity);
+            Destroy(obj, 1);
         }
     }
 
 
-    /*       DESATIVANDO A ANIMAÇÃO DO TRAMPOLIN QUANDO O PLAYER PARAR DE ENCOSTAR NELE
-    --------------------------------------------------------------------------------------------------------------*/
+    /// <summary>
+    /// Deactivates the trampoline animation when the player leaves the trampoline.
+    /// </summary>
+    /// <param name="collision">Collision data from the 2D physics system.</param>
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.CompareTag("Player"))
         {
             anim.SetBool("trampolin", false);
         }

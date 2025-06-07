@@ -1,24 +1,37 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// Controls the movement of a floating platform while the player is standing on it.
+/// </summary>
 
 public class FloatingPlataform1 : MonoBehaviour
 {
-/*       DECLARANDO UMA VARIÁVEL PARA SER USADA COMO A VELOCIDADE DA PLATAFORMA FLUTUANTE
---------------------------------------------------------------------------------------------------------------*/
+    #region Atributes
+
+    [Header("Settings")]
+    [Tooltip("The speed at which the platform moves along the X-axis")]
     public float speed = 3f;
-    
-   
-/*      FAZENDO A PLATAFORMA SE MOVER QUANDO O PLAYER ESTIVER EM CIMA
---------------------------------------------------------------------------------------------------------------- */      
+
+    [Tooltip("The maximum X position the platform can reach.")]
+    public float maxX = 29f;
+
+    #endregion
+
+    #region Unity Events
+
+    /// <summary>
+    /// Moves the platform to the right as long as the player stays on it.
+    /// </summary>
+    /// <param name="collision">Collision information from the 2D physics system.</param>     
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
-            if (transform.position.x <= 29)
+            if (collision.gameObject.CompareTag("Player") && transform.position.x <= maxX)
             {
-                transform.position = new Vector2(transform.position.x + speed * Time.deltaTime, transform.position.y);
+                transform.position += Vector3.right * speed * Time.deltaTime;
             }
         }
     }
+    #endregion
 }

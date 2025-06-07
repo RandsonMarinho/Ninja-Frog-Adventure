@@ -1,24 +1,38 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// A simple Game Manager script to store UI button methods such as Restart and Quit.
+/// </summary>
+
 public class GameManager : MonoBehaviour
 {
-/* CRIANDO UM SIMPLES SCRIPT SOMENTE PARA ARMAZENAR OS MÉTODOS QUE SERÃO UTILIZADOS NOS BOTÕES DA INTERFACE*/
-//-----------------------------------------------------------------------------------------------------------------
+    #region Public Methods
 
-    //               MÉTODO PARA REINICIAR O JOGO
+    /// <summary>
+    /// Reloads the current scene and resumes game time.
+    /// </summary>
+    /// 
+
+    private void Start()
+    {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+    }
+
     public void Restart()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(currentScene.name);
         Time.timeScale = 1;
     }
 
-
-    //               MÉTODO PARA SAIR DO JOGO
+    /// <summary>
+    /// Exits the game application.
+    /// </summary>
     public void Quit()
     {
         Application.Quit();
     }
+    #endregion
 }

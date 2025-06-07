@@ -1,32 +1,51 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// Causes the platform to fall shortly after the player steps on it.
+/// </summary>
 
 public class FallingPlataform : MonoBehaviour
 {
-/*            CRIANDO UMA VARIÁVEL PARA O CORPO DA PLATAFORMA, E OUTRA PARA SER UMA CARACTERÍSTICA DESTE CORPO
------------------------------------------------------------------------------------------------------------------*/
-            
+    #region Components
+
+    [Header("References")]
+    [Tooltip("BoxCollider2D of the platform.")]
     public BoxCollider2D boxCollider;
+
+    [Tooltip("TargetJoint2D responsible for holding the platform in place.")]
     public TargetJoint2D joint;
 
+    #endregion
 
-/*               CRIANDO UM MÉTODO PARA FAZER A PLATAFORMA CAIR
---------------------------------------------------------------------------------------------------------------*/
+    #region Unity Events
+
+    /// <summary>
+    /// Detects when the player lands on the platform and schedules the fall.
+    /// </summary>
+    /// <param name="collision">Collision information from the 2D physics system.</param>
+    
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Invoke(nameof(Falling), 0.1f);
+        }
+    }
+
+    #endregion
+
+    #region Methods
+
+    /// <summary>
+    /// Disables the platform's collider and joint, making it fall.
+    /// </summary>
+
     void Falling()
     {
         boxCollider.enabled = false;
         joint.enabled = false;
     }
 
-
-/*       FAZENDO A PLATAFORMA CAIR QUANDO O PLAYER ESTIVER EM CIMA DELA
---------------------------------------------------------------------------------------------------------------*/
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.tag == "Player")
-        {
-            Invoke("Falling", 0.1f);
-        }
-    }
+    #endregion
 }

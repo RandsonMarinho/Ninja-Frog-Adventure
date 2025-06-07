@@ -1,253 +1,199 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
+/// <summary>
+/// Controla movimentação, pulo, colisões e eventos do jogador.
+/// </summary>
 public class Player : MonoBehaviour
 {
-/*                                     ORGANIZANDO AS VARIÁVEIS DO SCRIPT
------------------------------------------------------------------------------------------------------------------ */                      
-    [Header("Atributes")]
+    #region Atributes
+    [Header("Atributos")]
     public float speed;
     public float jumpForce;
     public int life;
+    #endregion
 
+    #region Components
     [Header("Components")]
     private Vector2 direction;
     public Rigidbody2D rb;
     public Animator anim;
     public Animator endPointAnim;
-    public GameObject cameraobj;
+    public GameObject cameraObj;
     public GameObject wall;
     public GameObject jumpAudio;
     public GameObject doubleJumpAudio;
     public GameObject backgroundAudio;
     public GameObject hitAudio;
     public GameObject winAudio;
-    private bool isGrounded;
-    private bool isJumping;
-    private bool doubleJump;
-    private bool isHIt;
-    
+    #endregion
 
+    #region States
+    public bool isGrounded;
+    public bool isJumping;
+    public bool doubleJump;
+    private bool isHit;
+    #endregion
+
+    #region UI
     [Header("UI")]
     public GameObject gameOver;
     public GameObject winGame;
+    #endregion
 
-/*                                    MANIPULAÇÃO DOS MÉTODOS DA UNITY
---------------------------------------------------------------------------------------------------------------*/                                     
-
-    
     void Update()
     {
         direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        Anim();
-        Jump();
+        HandleAnimation();
+        HandleJump();
     }
 
     private void FixedUpdate()
     {
-        Mov();
+        Move();
     }
-
-/*                            MANIPULANDO MÉTODOS DA UNITY QUE DETECTAM COLISÕES
---------------------------------------------------------------------------------------------------------------*/                           
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.layer == 6)
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Floor"))
         {
             isGrounded = true;
             doubleJump = false;
+            isJumping = false;
         }
 
-        if (collision.gameObject.tag == "FPlatform")
+        if (collision.gameObject.CompareTag("FPlatform"))
         {
-            gameObject.transform.parent = collision.transform;
+            transform.parent = collision.transform;
+        }
+        
+        if (collision.gameObject.CompareTag("Hit"))
+        {
+            isHit = true;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("FPlatform"))
+        {
+            transform.parent = null;
         }
 
-        if (collision.gameObject.tag == "Hit")
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Floor"))
         {
-            isHIt = true;       
+            isGrounded = false;
+            isJumping = true;
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
-        if (collision.gameObject.tag == "cp1")
+        switch (collision.tag)
         {
-            cameraobj.gameObject.transform.position = new Vector3(0, 0, -10);
-        }
-
-        if (collision.gameObject.tag == "cp2")
-        {
-            cameraobj.gameObject.transform.position = new Vector3(17.67f, 0, -10);
-
-        }
-
-        if (collision.gameObject.tag == "cp3")
-        {
-            cameraobj.gameObject.transform.position = new Vector3(35.55f, 0, -10);
-
-        }
-
-        if (collision.gameObject.tag == "cp4")
-        {
-            cameraobj.gameObject.transform.position = new Vector3(51.60f, 0, -10);
-
-        }
-
-        if (collision.gameObject.tag == "cp5")
-        {
-            cameraobj.gameObject.transform.position = new Vector3(67.60f, 0, -10);
-
-        }
-
-        if (collision.gameObject.tag == "cp6")
-        {
-            cameraobj.gameObject.transform.position = new Vector3(83.8f, 0, -10);
-            wall.SetActive(true);
-
-        }
-
-        if (collision.gameObject.tag == "cp7")
-        {
-            cameraobj.gameObject.transform.position = new Vector3(99.50f, 0, -10);
-            wall.SetActive(true);
-
-        }
-
-        if (collision.gameObject.tag == "EndPoint")
-        {
-            StartCoroutine(Win());
+            case "cp1": SetCameraPosition(new Vector3(0, 0, -10)); break;
+            case "cp2": SetCameraPosition(new Vector3(17.67f, 0, -10)); break;
+            case "cp3": SetCameraPosition(new Vector3(35.55f, 0, -10)); break;
+            case "cp4": SetCameraPosition(new Vector3(51.60f, 0, -10)); break;
+            case "cp5": SetCameraPosition(new Vector3(67.60f, 0, -10)); break;
+            case "cp6": SetCameraPosition(new Vector3(83.8f, 0, -10)); wall.SetActive(true); break;
+            case "cp7": SetCameraPosition(new Vector3(99.50f, 0, -10)); wall.SetActive(true); break;
+            case "EndPoint": StartCoroutine(Win()); break;
+            case "Hit": isHit = true; break;
         }
     }
-/*                                       CRIAÇÃO DOS COROUTINES    
--------------------------------------------------------------------------------------------------------------- */
 
+    #region Métodos Auxiliares
 
-//                          COROUTINE À SER EXECUTADO QUANDO O PLAYER VENCER O JOGO                                           
-
-    IEnumerator Win()
+    private void SetCameraPosition(Vector3 position)
     {
-        endPointAnim.SetBool("transition", true);
-        speed = 0;
-        jumpForce = 0;
-        Destroy(backgroundAudio.gameObject);
-        winAudio.SetActive(true);
-        yield return new WaitForSeconds(5);
-        winGame.SetActive(true);
-        Time.timeScale = 0;
+        cameraObj.transform.position = position;
     }
 
-//                            COROUTINE À SER CHAMADO QUANDO O PLAYER FALHAR       
-
-    IEnumerator Disappear()
-    {
-        Destroy(backgroundAudio.gameObject);
-        hitAudio.SetActive(true);
-        anim.SetInteger("transition", 4);
-        speed = 0;
-        jumpForce = 0;
-
-        yield return new WaitForSeconds(0.8f);
-        gameOver.SetActive(true);
-        Time.timeScale = 0;
-    }
-     
-/*                                       CRIAÇÃO DOS MÉTODOS 
----------------------------------------------------------------------------------------------------------------- */                                   
-
-
-//                      MÉTODO PARA FAZER O PLAYER SE MOVER
-    void Mov()
+    private void Move()
     {
         rb.velocity = new Vector2(direction.x * speed, rb.velocity.y);
     }
 
-//                      MÉTODO PARA FAZER O PLAYER PULAR
-    void Jump()
+    private void HandleJump()
     {
         if (Input.GetButtonDown("Jump"))
         {
             if (isGrounded)
             {
-                rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-                GameObject obj = Instantiate(jumpAudio, new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y, this.gameObject.transform.position.z), Quaternion.identity);
-                Destroy(obj.gameObject, 1);
+                Jump(jumpForce, jumpAudio);
                 isJumping = true;
                 isGrounded = false;
             }
-            else
+            else if (isJumping)
             {
-                if (isJumping)
-                {
-                    rb.AddForce(new Vector2(0f, jumpForce * 1.5f), ForceMode2D.Impulse);
-                    GameObject obj = Instantiate(doubleJumpAudio, new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y, this.gameObject.transform.position.z), Quaternion.identity);
-                    Destroy(obj.gameObject, 1);
-                    anim.SetInteger("transition", 3);
-                    doubleJump = true;
-                    isJumping = false;
-                }
+                Jump(jumpForce, doubleJumpAudio);
+                anim.SetInteger("transition", 3);
+                doubleJump = true;
+                isJumping = false;
             }
         }
     }
 
-//                 MÉTODO PARA EXECUTAR CADA ANIMAÇÃO DO PLAYER NO MOMENTO CORRETO
-    void Anim()
+    private void Jump(float force, GameObject audio)
     {
-        if (direction.x > 0)
-        {
-            if (isGrounded)
-            {
-                anim.SetInteger("transition", 1);
-                if (doubleJump)
-                {
-                    anim.SetInteger("transition", 3);
-                }
-            }
-            transform.eulerAngles = Vector2.zero;
-        }
+        rb.velocity = new Vector2(rb.velocity.x, 0);
+        rb.AddForce(Vector2.up * force, ForceMode2D.Impulse);
+        GameObject sound = Instantiate(audio, transform.position, Quaternion.identity);
+        Destroy(sound, 1f);
+    }
 
-        if (direction.x < 0)
+    private void HandleAnimation()
+    {
+        if (isHit)
         {
-            if (isGrounded)
-            {
-                anim.SetInteger("transition", 1);
-                if (doubleJump)
-                {
-                    anim.SetInteger("transition", 3);
-                }
-            }
-            transform.eulerAngles = new Vector2(0, 180);
-        }
-
-        if (direction.x == 0)
-        {
-            if (isGrounded)
-            {
-                anim.SetInteger("transition", 0);
-                if (doubleJump)
-                {
-                    anim.SetInteger("transition", 3);
-                }
-            }
+            StartCoroutine(Disappear());
+            return;
         }
 
         if (!isGrounded)
         {
-            anim.SetInteger("transition", 2);
-            if (doubleJump)
-            {
-                anim.SetInteger("transition", 3);
-            }
+            anim.SetInteger("transition", doubleJump ? 3 : 2);
+        }
+        else
+        {
+            if (direction.x == 0)
+                anim.SetInteger("transition", doubleJump ? 3 : 0);
+            else
+                anim.SetInteger("transition", doubleJump ? 3 : 1);
         }
 
-        if (isHIt)
-        {
-            StartCoroutine(Disappear());
-        }
+        if (direction.x != 0)
+            transform.eulerAngles = new Vector3(0, direction.x > 0 ? 0 : 180, 0);
     }
+
+    private IEnumerator Win()
+    {
+        endPointAnim.SetBool("transition", true);
+        StopPlayer();
+        Destroy(backgroundAudio);
+        winAudio.SetActive(true);
+        yield return new WaitForSeconds(5f);
+        winGame.SetActive(true);
+        Time.timeScale = 0;
+    }
+
+    private IEnumerator Disappear()
+    {
+        Destroy(backgroundAudio);
+        hitAudio.SetActive(true);
+        anim.SetInteger("transition", 4);
+        StopPlayer();
+        yield return new WaitForSeconds(0.8f);
+        gameOver.SetActive(true);
+        Time.timeScale = 0;
+    }
+
+    private void StopPlayer()
+    {
+        speed = 0;
+        jumpForce = 0;
+    }
+    #endregion
 }

@@ -4367,7 +4367,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 705f2964ecedb4944ad6d75337df7bee, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.061
+  m_Volume: 0.05
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -37804,13 +37804,16 @@ MonoBehaviour:
   rb: {fileID: 1497371005}
   anim: {fileID: 1497371006}
   endPointAnim: {fileID: 1522771119}
-  cameraobj: {fileID: 519420028}
+  cameraObj: {fileID: 519420028}
   wall: {fileID: 818104846}
   jumpAudio: {fileID: 1217686123656977746, guid: 4ac13fe7d245bea43bbcdcceae5b6d45, type: 3}
   doubleJumpAudio: {fileID: 4170610566501471735, guid: 0333ca964a25d4e4fa808a8772f562c2, type: 3}
   backgroundAudio: {fileID: 257143673}
   hitAudio: {fileID: 836431656}
   winAudio: {fileID: 1956459192}
+  isGrounded: 0
+  isJumping: 0
+  doubleJump: 0
   gameOver: {fileID: 1154532266}
   winGame: {fileID: 804619370}
 --- !u!1 &1522771115
@@ -40574,6 +40577,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 3
+  maxX: 29
 --- !u!257 &1852542290
 TargetJoint2D:
   m_ObjectHideFlags: 0
@@ -41244,7 +41248,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 30b3b28e2aaed3a419041a56377bbecb, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.2
+  m_Volume: 0.09
   m_Pitch: 1
   Loop: 0
   Mute: 0
